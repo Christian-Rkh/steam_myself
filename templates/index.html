@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Steam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Bulma (선택) --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"&gt;
+<style>
+.container { max-width: 960px; margin: 0 auto; }
+.img-wrap img { max-width: 100%; border-radius: 12px; }
+.notification { white-space: pre-line; } /* 줄바꿈 보이게 */
+</style>
+</head>
+<body class="has-background-light">
+
+<section class="section">
+<div class="container">
+<h1 class="title">가격</h1>
+
+<div class="columns">
+<div class="column is-two-thirds">
+<div class="box">
+<!-- 회원 이름 --> <label class="label" for="name">회원 이름</label>
+<input id="name" class="input" placeholder="이름을 입력하세요">
+<br><br>
+
+<!-- 게임 이름 --> <label class="label" for="type">게임 이름</label>
+<div class="select is-fullwidth">
+<select id="type">
+<option value="200">Geometry Dash</option>
+<option value="190">Hollow knight</option>
+<option value="180">Demon Slayer: Kimetsu no Yaiba: Hinokami Blood Wind Story</option>
+</select>
+</div>
+<br>
+
+<!-- 버튼 --> <div class="buttons">
+<button class="button is-primary" onclick="sendOrder()">주문하기</button>
+<button class="button is-link is-light" onclick="showType()">물품보여주기</button>
+<button class="button is-info is-light" onclick="showCoupon()">쿠폰 보여주기</button>
+</div>
+
+<!-- 쿠폰 --> <div class="field">
+<label class="label" for="couponSelect">쿠폰 선택</label>
+<div class="select is-fullwidth">
+<select id="couponSelect">
+<option value="1">
+Demon Slayer: Kimetsu no Yaiba: Hinokami Blood Wind Story 2만원 할일 쿠폰
+</option>
+<option value="2">Geometry Dash 80% off</option>
+</select>
+</div>
+</div>
+
+<!-- 결과 --> <p id="orderResult" class="notification is-primary is-light" style="display:none;"></p>
+<p id="result" class="notification is-link is-light" style="display:none;"></p>
+<p id="coupon" class="notification is-info is-light" style="display:none;"></p>
+</div>
+</div>
+
+<div class="column">
+<div class="box img-wrap">
+<img src="https://i.imgur.com/SXI7cA1.png&quot; width="700" alt="Steam banner">
+</div>
+<div class="box">
+<p id="typeResult" class="content has-text-grey">선택한 게임 목록/정보가 여기 표시됩니다.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<script>
+async function showCoupon() {
+const res = await fetch("/coupons");
+const data = await res.json();
+const el = document.getElementById("coupon");
+el.innerText = data.aaaa;
+el.style.display = "block";
+}
+
+async function showType() {
+const res = await fetch("/type");
+const data = await res.json();
+document.getElementById("typeResult").innerText = data.type;
+}
+
+async function sendOrder() {
+const name = document.getElementById("name").value.trim();
+const typeEl = document.getElementById("type");
+const typePrice = parseInt(typeEl.value, 10); //Price(숫자)
+const typeName = typeEl.options[typeEl.selectedIndex].text;
+
+const couponEl = document.getElementById("couponSelect");
+const couponId = parseInt(couponEl.value, 10); // 쿠폰의 value, 1 또는 2
+
+const res = await fetch("/order", {
+method: "POST",
+headers:{ "Content-Type": "application/json"},
+body: JSON.stringify({
+name: name,
+type: typePrice,
+coupon: couponId,
+type_name: typeName
+})
+});
+
+const data = await res.json();
+const out = document.getElementById("orderResult");
+out.innerText = data.msg;
+out.style.display = "block"; // 화면에 보이게
+}
+</script>
+</body>
+</html>
